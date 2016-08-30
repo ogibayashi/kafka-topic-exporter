@@ -47,6 +47,7 @@ public class KafkaTopicExporter {
                     executor.shutdown();
                     try {
                         if(executor.awaitTermination(3000L, TimeUnit.MILLISECONDS)) {
+                            LOG.info("Shutdown completed");
                         } else {
                             LOG.info("Shutdown timed out");
                         }

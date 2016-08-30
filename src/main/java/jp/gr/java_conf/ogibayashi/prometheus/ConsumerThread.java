@@ -35,7 +35,7 @@ class ConsumerThread implements Runnable {
             }
         }
         finally {
-            LOG.info("Shutting down");
+            LOG.info("Shutting down consumer");
             consumer.close();
         }
     }
