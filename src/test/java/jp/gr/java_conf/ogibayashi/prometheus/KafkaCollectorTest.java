@@ -66,8 +66,8 @@ public class KafkaCollectorTest extends TestCase
         List<MetricFamilySamples.Sample> samples = mfs.samples;
 
         assertEquals(2, samples.size());
-        assertEquals(jsonRecord.getLabels(), MetricUtil.getLabelMapFromSample(samples.get(0)));
-        assertEquals(18.0, samples.get(0).value);
+        assertEquals(jsonRecord.getLabels(), MetricUtil.getLabelMapFromSample(samples.get(1)));
+        assertEquals(18.0, samples.get(1).value);
             
     }
     

@@ -49,19 +49,15 @@ public class KafkaCollector extends Collector {
                                                  Collections.singletonList(sampleToAdd));
             }
             else {
-                List<MetricFamilySamples.Sample> samples = new ArrayList<>();
-                boolean added = false;
-                for(MetricFamilySamples.Sample sample: mfs.samples) {
-                    if(sample.labelNames.equals(labelNames) && sample.labelValues.equals(labelValues)) {
-                        samples.add(sampleToAdd);
-                        added = true;
-                    } else {
-                        samples.add(sample);
+                List<MetricFamilySamples.Sample> samples = new ArrayList(mfs.samples);
+                MetricFamilySamples.Sample toRemove = null;
+                for(MetricFamilySamples.Sample s: samples) {
+                    if (MetricUtil.getLabelMapFromSample(s).equals(record.getLabels())) {
+                        toRemove = s;
                     }
                 }
-                if (! added) {
-                    samples.add(sampleToAdd);
-                }
+                samples.remove(toRemove);
+                samples.add(sampleToAdd);
                 newMfs = new MetricFamilySamples(metricName, Type.GAUGE, "", samples);
             }
             
