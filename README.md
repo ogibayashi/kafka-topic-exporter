@@ -12,12 +12,16 @@ java -jar kafka-topic-exporter-0.0.1-jar-with-dependencies.jar config/kafka-topi
 
 ```
 exporter.port=10040
+exporter.metric.expire=120
 bootstrap.servers=localhost:6667
 group.id=test
 # Java regex
 kafka.consumer.topics=export\..*
 kafka.consumer.remove.prefix=export\.aggregated_
 ```
+
+* exporter.metric.expire(default: 0 (no expire))
+    * When a metric (name & labels) is not updated for this time period (in second), it will be removed from exporter response.
 
 ### Record format
 
