@@ -25,7 +25,7 @@ public class KafkaTopicExporter {
     {
         final PropertyConfig pc = new PropertyConfig(args[0]);
 
-        int serverPort = pc.getInt(PropertyConfig.Constants.EXPORTER_PORT.key);
+        int serverPort = pc.getExporterPort();
         Server server = new Server(serverPort);
         LOG.info("starting server on port {}", serverPort);
 

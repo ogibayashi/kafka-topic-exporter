@@ -46,6 +46,10 @@ public class PropertyConfig {
         return (long)Long.parseLong(get(Constants.EXPORTER_METRIC_EXPIRE.key, "0"));
     }
 
+    public int getExporterPort() {
+        return(getInt(PropertyConfig.Constants.EXPORTER_PORT.key, 9185));
+    }
+    
     public String get(String key) {
         String value = props.getProperty(key);
         if (value == null)
