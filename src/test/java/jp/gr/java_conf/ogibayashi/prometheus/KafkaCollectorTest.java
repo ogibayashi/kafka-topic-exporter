@@ -10,13 +10,15 @@ import io.prometheus.client.Collector.MetricFamilySamples;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 public class KafkaCollectorTest extends TestCase
 {
     private ObjectMapper mapper = new ObjectMapper();
-
+    private PropertyConfig emptyConfig = new PropertyConfig();
+    
     public void testAddSimpleMetric() {
-        KafkaCollector collector = new KafkaCollector();
+        KafkaCollector collector = new KafkaCollector(emptyConfig);
         final String logRecord = "{\"name\":\"foo\", \"value\": 9}";
         final String topic = "test.hoge";
 
@@ -31,7 +33,7 @@ public class KafkaCollectorTest extends TestCase
     }
     
     public void testAddMetricWithLabel() throws IOException {
-        KafkaCollector collector = new KafkaCollector();
+        KafkaCollector collector = new KafkaCollector(emptyConfig);
         final String logRecord = "{\"name\":\"foo\", \"labels\": { \"label1\": \"v1\", \"lable2\": \"v2\" }, \"value\": 9}";
         final String topic = "test.hoge";
         KafkaExporterLogEntry jsonRecord = mapper.readValue(logRecord, KafkaExporterLogEntry.class);
@@ -49,7 +51,7 @@ public class KafkaCollectorTest extends TestCase
     }
     
     public void testReplaceValueWithSameLabel() throws IOException {
-        KafkaCollector collector = new KafkaCollector();
+        KafkaCollector collector = new KafkaCollector(emptyConfig);
 
         final String logRecord1 = "{\"name\":\"foo\", \"labels\": { \"label1\": \"v1\", \"lable2\": \"v2\" }, \"value\": 9}";
         final String logRecord2 = "{\"name\":\"foo\", \"labels\": { \"label1\": \"aa1\", \"lable2\": \"bb2\" }, \"value\": 10}";
@@ -69,6 +71,32 @@ public class KafkaCollectorTest extends TestCase
         assertEquals(jsonRecord.getLabels(), MetricUtil.getLabelMapFromSample(samples.get(1)));
         assertEquals(18.0, samples.get(1).value);
             
+    }
+
+    public void testMetricExpire() throws IOException {
+        PropertyConfig config = new PropertyConfig();
+        config.set("exporter.metric.expire", "120");
+
+        KafkaCollector collector = new KafkaCollector(config);
+        LocalDateTime setDate1 = LocalDateTime.of(2016, 9, 20, 10, 0);
+        LocalDateTime setDate2 = LocalDateTime.of(2016, 9, 20, 10, 9);
+        LocalDateTime getDate = LocalDateTime.of(2016, 9, 20, 10, 10);
+
+        final String logRecord1 = "{\"name\":\"foo\", \"labels\": { \"label1\": \"v1\", \"lable2\": \"v2\" }, \"value\": 9}";
+        final String logRecord2 = "{\"name\":\"foo\", \"labels\": { \"label1\": \"aa1\", \"lable2\": \"bb2\" }, \"value\": 10}";
+        final String topic = "test.hoge";
+        KafkaExporterLogEntry jsonRecord = mapper.readValue(logRecord2, KafkaExporterLogEntry.class);
+
+        collector.add(topic, logRecord1, setDate1);
+        collector.add(topic, logRecord2, setDate2);
+
+        List<MetricFamilySamples> mfsList = collector.collect(getDate);
+        MetricFamilySamples mfs = mfsList.get(0);
+        List<MetricFamilySamples.Sample> samples = mfs.samples;
+
+        assertEquals(1, samples.size());
+        assertEquals(jsonRecord.getLabels(), MetricUtil.getLabelMapFromSample(samples.get(0)));
+        assertEquals(10.0, samples.get(0).value);
     }
     
 }

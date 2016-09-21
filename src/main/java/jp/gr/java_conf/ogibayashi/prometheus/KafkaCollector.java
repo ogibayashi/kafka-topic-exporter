@@ -13,55 +13,38 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeSet;
+import java.time.LocalDateTime;
 
 public class KafkaCollector extends Collector {
     private static final Logger LOG = LoggerFactory.getLogger(KafkaCollector.class);
 
     private ObjectMapper mapper = new ObjectMapper();
     private List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
-    private Map<String, MetricFamilySamples> metricFamilySamplesMap =
-        new HashMap<>();    
+    private Map<String, Map<KafkaExporterLogEntry, LocalDateTime>> metricEntries = new HashMap();
+    private PropertyConfig pc;
+    private long expire;
     
-    public KafkaCollector() {
+    public KafkaCollector(PropertyConfig pc) {
+        this.pc = pc;
+        expire = pc.getMetricExpire();
+    }
+
+    public void add(String topic, String recordValue) {
+        add(topic, recordValue, LocalDateTime.now());
     }
     
-    public void add(String topic, String recordValue) {
+    public void add(String topic, String recordValue, LocalDateTime datetime) {
         LOG.debug("add: {}, {}", topic, recordValue);
         try {          
             KafkaExporterLogEntry record = mapper.readValue(recordValue, KafkaExporterLogEntry.class);
             String metricName = topic.replaceAll("\\.","_") + "_" + record.getName();
+            if(! metricEntries.containsKey(metricName)){
+                metricEntries.put(metricName, new HashMap());
+            }
 
-            ArrayList<String> labelNames = new ArrayList<String>();
-            ArrayList<String> labelValues = new ArrayList<String>();
-            if (record.getLabels() != null) {
-                for(Map.Entry<String, String> entry: record.getLabels().entrySet()){
-                    labelNames.add(entry.getKey());
-                    labelValues.add(entry.getValue());
-                }
-            }
-            MetricFamilySamples mfs = metricFamilySamplesMap.get(metricName);
-            MetricFamilySamples newMfs;
-
-            // TODO: refine the code
-            MetricFamilySamples.Sample sampleToAdd = new MetricFamilySamples.Sample(metricName, labelNames, labelValues, record.getValue());
-            if(mfs == null) {
-                newMfs = new MetricFamilySamples(metricName, Type.GAUGE, "",
-                                                 Collections.singletonList(sampleToAdd));
-            }
-            else {
-                List<MetricFamilySamples.Sample> samples = new ArrayList(mfs.samples);
-                MetricFamilySamples.Sample toRemove = null;
-                for(MetricFamilySamples.Sample s: samples) {
-                    if (MetricUtil.getLabelMapFromSample(s).equals(record.getLabels())) {
-                        toRemove = s;
-                    }
-                }
-                samples.remove(toRemove);
-                samples.add(sampleToAdd);
-                newMfs = new MetricFamilySamples(metricName, Type.GAUGE, "", samples);
-            }
-            
-            metricFamilySamplesMap.put(metricName, newMfs);
+            Map<KafkaExporterLogEntry, LocalDateTime> entry = metricEntries.get(metricName);
+            entry.remove(record);
+            entry.put(record, datetime);
         }
         catch(JsonMappingException e){
             LOG.warn("Invalid record: " + recordValue);
@@ -73,9 +56,42 @@ public class KafkaCollector extends Collector {
 
     @Override
     public List<MetricFamilySamples> collect() {
+        return collect(LocalDateTime.now());
+    }
+
+    
+    public List<MetricFamilySamples> collect(LocalDateTime current_timestamp) {
+        
         List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
-        mfsList.addAll(metricFamilySamplesMap.values());
+        for(Map.Entry<String, Map<KafkaExporterLogEntry, LocalDateTime>> e: metricEntries.entrySet()){
+            List<MetricFamilySamples.Sample> samples = new ArrayList();
+            for(Map.Entry<KafkaExporterLogEntry, LocalDateTime> le: e.getValue().entrySet()){
+                if (expire != 0 && le.getValue().plusSeconds(expire).isBefore(current_timestamp)) {
+                    System.out.println("timeout");
+                    e.getValue().remove(le);
+                    if(e.getValue().isEmpty()) {
+                        metricEntries.remove(e);
+                    }
+                }
+                else {
+                    samples.add(generateSample(e.getKey(), le.getKey()));
+                }
+            }
+            mfsList.add(new MetricFamilySamples(e.getKey(), Type.GAUGE, "", samples));
+        }
 
         return mfsList;
+    }
+
+    public MetricFamilySamples.Sample generateSample(String metricName, KafkaExporterLogEntry logEntry) {
+        ArrayList<String> labelNames = new ArrayList<String>();
+        ArrayList<String> labelValues = new ArrayList<String>();
+        if (logEntry.getLabels() != null) {
+            for(Map.Entry<String, String> entry: logEntry.getLabels().entrySet()){
+                labelNames.add(entry.getKey());
+                labelValues.add(entry.getValue());
+            }
+        }
+        return new MetricFamilySamples.Sample(metricName, labelNames, labelValues, logEntry.getValue());
     }
 }

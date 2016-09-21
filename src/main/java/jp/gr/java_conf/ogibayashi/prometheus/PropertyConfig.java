@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 public class PropertyConfig {
     public enum Constants {
         EXPORTER_PORT("exporter.port"),
+        EXPORTER_METRIC_EXPIRE("exporter.metric.expire"),
         KAFKA_CONSUMER_TOPICS("kafka.consumer.topics"),
         KAKFA_CONSUER_REMOVEPREFIX("kafka.consumer.remove.prefix");
         
@@ -22,6 +23,10 @@ public class PropertyConfig {
 
     private final Properties props;
 
+    public PropertyConfig() {
+        props = new Properties();
+    }
+    
     public PropertyConfig(String propFilePath) throws IOException {
         props = loadProperties(propFilePath);
         props.put("enable.auto.commit", "false");
@@ -35,6 +40,10 @@ public class PropertyConfig {
     
     public Properties getProperties() {
         return props;
+    }
+
+    public long getMetricExpire() {
+        return (long)Long.parseLong(get(Constants.EXPORTER_METRIC_EXPIRE.key, "0"));
     }
 
     public String get(String key) {
@@ -51,6 +60,10 @@ public class PropertyConfig {
         return value;
     }
 
+    public void set(String key, String value) {
+        props.setProperty(key, value);
+    }
+    
     public int getInt(String key) {
         return (int)Long.parseLong(get(key));
     }

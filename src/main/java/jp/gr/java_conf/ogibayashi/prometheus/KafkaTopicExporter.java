@@ -36,10 +36,10 @@ public class KafkaTopicExporter {
         
        
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        KafkaCollector kc = new KafkaCollector().register();
+        KafkaCollector kc = new KafkaCollector(pc).register();
         
         final Future consumer = executor.submit(new Thread(new ConsumerThread(kc,pc)));
-
+        
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 public void run() {
                     LOG.info("Shutting down");
