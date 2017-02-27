@@ -67,7 +67,6 @@ public class KafkaCollector extends Collector {
             List<MetricFamilySamples.Sample> samples = new ArrayList();
             for(Map.Entry<KafkaExporterLogEntry, LocalDateTime> le: e.getValue().entrySet()){
                 if (expire != 0 && le.getValue().plusSeconds(expire).isBefore(current_timestamp)) {
-                    System.out.println("timeout");
                     e.getValue().remove(le);
                     if(e.getValue().isEmpty()) {
                         metricEntries.remove(e);
