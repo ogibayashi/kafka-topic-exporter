@@ -12,7 +12,7 @@ public class PropertyConfig {
         EXPORTER_PORT("exporter.port"),
         EXPORTER_METRIC_EXPIRE("exporter.metric.expire"),
         KAFKA_CONSUMER_TOPICS("kafka.consumer.topics"),
-        KAKFA_CONSUER_REMOVEPREFIX("kafka.consumer.remove.prefix");
+        KAKFA_CONSUMER_REMOVEPREFIX("kafka.consumer.remove.prefix");
         
         public final String key;
 
