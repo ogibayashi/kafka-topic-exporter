@@ -75,7 +75,7 @@ public class KafkaCollectorTest extends TestCase
 
     public void testMetricExpire() throws IOException {
         PropertyConfig config = new PropertyConfig();
-        config.set("exporter.metric.expire", "120");
+        config.set("exporter.metric.expire.seconds", "120");
 
         KafkaCollector collector = new KafkaCollector(config);
         LocalDateTime setDate1 = LocalDateTime.of(2016, 9, 20, 10, 0);
