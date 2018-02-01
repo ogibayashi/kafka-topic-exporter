@@ -23,6 +23,11 @@ public class KafkaTopicExporter {
 
     public static void main( String[] args ) throws IOException
     {
+    	if(args.length == 0)
+        {
+            System.out.println("Proper Usage is: java -jar <kafka-topic-exporter>.jar <config file>.properties");
+            System.exit(0);
+        }
         final PropertyConfig pc = new PropertyConfig(args[0]);
 
         int serverPort = pc.getExporterPort();

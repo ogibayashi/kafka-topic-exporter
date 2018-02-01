@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 public class PropertyConfig {
     public enum Constants {
         EXPORTER_PORT("exporter.port"),
-        EXPORTER_METRIC_EXPIRE("exporter.metric.expire"),
+        EXPORTER_METRIC_EXPIRE("exporter.metric.expire.seconds"),
         KAFKA_CONSUMER_TOPICS("kafka.consumer.topics"),
         KAKFA_CONSUMER_REMOVEPREFIX("kafka.consumer.remove.prefix");
         
