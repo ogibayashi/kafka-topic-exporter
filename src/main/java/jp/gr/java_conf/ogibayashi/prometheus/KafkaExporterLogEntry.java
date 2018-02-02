@@ -11,6 +11,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @EqualsAndHashCode(exclude={"value"})
 public class KafkaExporterLogEntry {
     @NonNull private String name;
-    @NonNull private long value;
+    @NonNull private double value;
     private Map<String,String> labels;
 }
