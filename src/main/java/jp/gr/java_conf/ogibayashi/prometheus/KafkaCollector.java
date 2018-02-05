@@ -38,6 +38,9 @@ public class KafkaCollector extends Collector {
         try {          
             KafkaExporterLogEntry record = mapper.readValue(recordValue, KafkaExporterLogEntry.class);
             String metricName = topic.replaceAll("\\.","_") + "_" + record.getName();
+            if (metricName.startsWith("_")) {
+              metricName = metricName.substring(1);
+            }
             if(! metricEntries.containsKey(metricName)){
                 metricEntries.put(metricName, new ConcurrentHashMap());
             }
