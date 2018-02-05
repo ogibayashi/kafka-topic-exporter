@@ -20,7 +20,7 @@ public class KafkaCollector extends Collector {
 
     private ObjectMapper mapper = new ObjectMapper();
     private List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
-    private Map<String, Map<KafkaExporterLogEntry, LocalDateTime>> metricEntries = new ConcurrentHashMap();
+    private Map<String, Map<KafkaExporterLogEntry, LocalDateTime>> metricEntries = new ConcurrentHashMap<String, Map<KafkaExporterLogEntry, LocalDateTime>>();
     private PropertyConfig pc;
     private long expire;
     
@@ -42,7 +42,7 @@ public class KafkaCollector extends Collector {
               metricName = metricName.substring(1);
             }
             if(! metricEntries.containsKey(metricName)){
-                metricEntries.put(metricName, new ConcurrentHashMap());
+                metricEntries.put(metricName, new ConcurrentHashMap<KafkaExporterLogEntry, LocalDateTime>());
             }
 
             Map<KafkaExporterLogEntry, LocalDateTime> entry = metricEntries.get(metricName);
@@ -67,7 +67,7 @@ public class KafkaCollector extends Collector {
         
         List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
         for(Map.Entry<String, Map<KafkaExporterLogEntry, LocalDateTime>> e: metricEntries.entrySet()){
-            List<MetricFamilySamples.Sample> samples = new ArrayList();
+            List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
             for(Map.Entry<KafkaExporterLogEntry, LocalDateTime> le: e.getValue().entrySet()){
                 if (expire != 0 && le.getValue().plusSeconds(expire).isBefore(current_timestamp)) {
                     e.getValue().remove(le.getKey());
