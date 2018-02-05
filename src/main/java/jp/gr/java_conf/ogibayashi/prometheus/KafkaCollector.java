@@ -94,7 +94,7 @@ public class KafkaCollector extends Collector {
                 labelValues.add(entry.getValue());
             }
         }
-        MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample(metricName, labelNames, labelValues, logEntry.getValue());
+        MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample(metricName, labelNames, labelValues, logEntry.getValue(), logEntry.getTimestamp());
         LOG.debug("sample: {}", sample );
         return sample; 
     }
