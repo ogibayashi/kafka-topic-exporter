@@ -1,3 +1,7 @@
 *.log
 .DS_Store
 target/*
+/target/
+.classpath
+.project
+.settings/
