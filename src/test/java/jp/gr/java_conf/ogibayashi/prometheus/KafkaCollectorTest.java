@@ -52,7 +52,7 @@ public class KafkaCollectorTest extends TestCase
     
     public void testAddMetricWithLabelAndTimestamp() throws IOException {
         KafkaCollector collector = new KafkaCollector(emptyConfig);
-        final String logRecord = "{\"name\":\"foo\", \"labels\": { \"label1\": \"v1\", \"lable2\": \"v2\" }, \"value\": 9, \"timestamp\": 1517330227}";
+        final String logRecord = "{\"name\":\"test.foo\", \"labels\": { \"label1\": \"v1\", \"lable2\": \"v2\" }, \"value\": 9, \"timestamp\": 1517330227}";
         final String topic = "test.hoge";
         KafkaExporterLogEntry jsonRecord = mapper.readValue(logRecord, KafkaExporterLogEntry.class);
         
@@ -61,12 +61,12 @@ public class KafkaCollectorTest extends TestCase
         MetricFamilySamples mfs = mfsList.get(0);
         Map<String, String> labelMap = MetricUtil.getLabelMapFromSample(mfs.samples.get(0));
        
-        assertEquals("test_hoge_foo", mfs.name);
+        assertEquals("test_hoge_test_foo", mfs.name);
         assertEquals(Collector.Type.GAUGE, mfs.type);
         assertEquals("", mfs.help);
         assertEquals(jsonRecord.getLabels(), labelMap);
         assertEquals(9.0, mfs.samples.get(0).value);
-        assertEquals(1517330227, mfs.samples.get(0).timestamp.longValue());
+        assertEquals(1517330227, mfs.samples.get(0).timestampMs.longValue());
     }
 
     public void testReplaceValueWithSameLabel() throws IOException {
