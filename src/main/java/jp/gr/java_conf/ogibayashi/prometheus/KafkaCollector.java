@@ -37,7 +37,7 @@ public class KafkaCollector extends Collector {
         LOG.debug("add: {}, {}", topic, recordValue);
         try {          
             KafkaExporterLogEntry record = mapper.readValue(recordValue, KafkaExporterLogEntry.class);
-            String metricName = topic.replaceAll("\\.","_") + "_" + record.getName();
+            String metricName = topic.replaceAll("\\.","_") + "_" + record.getName().replaceAll("\\.","_");
             if (metricName.startsWith("_")) {
               metricName = metricName.substring(1);
             }
