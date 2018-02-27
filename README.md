@@ -5,7 +5,7 @@ Consume Kafka topics and export to Prometheus
 ### Start process
 
 ```
-java -jar kafka-topic-exporter-0.0.5-jar-with-dependencies.jar config/kafka-topic-exporter.properties
+java -jar kafka-topic-exporter-0.0.4-jar-with-dependencies.jar config/kafka-topic-exporter.properties
 ```
 
 ### Configuration
