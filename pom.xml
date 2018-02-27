@@ -4,7 +4,7 @@
   <groupId>jp.gr.java_conf.ogibayashi</groupId>
   <artifactId>kafka-topic-exporter</artifactId>
   <packaging>jar</packaging>
-  <version>0.0.4-beta.1</version>
+  <version>0.0.4</version>
   <name>kafka-topic-exporter</name>
   <url>http://maven.apache.org</url>
 
