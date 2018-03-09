@@ -25,10 +25,12 @@ class ConsumerThread implements Runnable {
         try {
             while (!Thread.interrupted()) {
                 ConsumerRecords<String, String> records = consumer.poll(100);
+                if (records.count() > 0)
+                	LOG.info("Got records count: " + String.valueOf(records.count()));
                 for (ConsumerRecord<String, String> record : records) {
                     String topic = record.topic();
-                    if(props.get(PropertyConfig.Constants.KAKFA_CONSUER_REMOVEPREFIX.key,null) != null) {
-                        topic = topic.replaceFirst("^" + props.get(PropertyConfig.Constants.KAKFA_CONSUER_REMOVEPREFIX.key), "");
+                    if(props.get(PropertyConfig.Constants.KAKFA_CONSUMER_REMOVEPREFIX.key,null) != null) {
+                        topic = topic.replaceFirst("^" + props.get(PropertyConfig.Constants.KAKFA_CONSUMER_REMOVEPREFIX.key), "");
                     }
                     collector.add(topic, record.value());
                 }

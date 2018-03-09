@@ -8,9 +8,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown=true)
-@EqualsAndHashCode(exclude={"value"})
+@EqualsAndHashCode(exclude={"value", "timestamp"})
 public class KafkaExporterLogEntry {
     @NonNull private String name;
-    @NonNull private long value;
+    @NonNull private double value;
+    private Long timestamp;
     private Map<String,String> labels;
 }

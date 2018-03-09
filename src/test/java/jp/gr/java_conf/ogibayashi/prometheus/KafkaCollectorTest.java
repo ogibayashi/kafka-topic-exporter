@@ -50,12 +50,31 @@ public class KafkaCollectorTest extends TestCase
         assertEquals(9.0, mfs.samples.get(0).value);
     }
     
+    public void testAddMetricWithLabelAndTimestamp() throws IOException {
+        KafkaCollector collector = new KafkaCollector(emptyConfig);
+        final String logRecord = "{\"name\":\"test.foo\", \"labels\": { \"label1\": \"v1\", \"lable2\": \"v2\" }, \"value\": 9, \"timestamp\": 1517330227}";
+        final String topic = "test.hoge";
+        KafkaExporterLogEntry jsonRecord = mapper.readValue(logRecord, KafkaExporterLogEntry.class);
+        
+        collector.add(topic, logRecord);
+        List<MetricFamilySamples> mfsList = collector.collect();
+        MetricFamilySamples mfs = mfsList.get(0);
+        Map<String, String> labelMap = MetricUtil.getLabelMapFromSample(mfs.samples.get(0));
+       
+        assertEquals("test_hoge_test_foo", mfs.name);
+        assertEquals(Collector.Type.GAUGE, mfs.type);
+        assertEquals("", mfs.help);
+        assertEquals(jsonRecord.getLabels(), labelMap);
+        assertEquals(9.0, mfs.samples.get(0).value);
+        assertEquals(1517330227, mfs.samples.get(0).timestampMs.longValue());
+    }
+
     public void testReplaceValueWithSameLabel() throws IOException {
         KafkaCollector collector = new KafkaCollector(emptyConfig);
 
-        final String logRecord1 = "{\"name\":\"foo\", \"labels\": { \"label1\": \"v1\", \"lable2\": \"v2\" }, \"value\": 9}";
-        final String logRecord2 = "{\"name\":\"foo\", \"labels\": { \"label1\": \"aa1\", \"lable2\": \"bb2\" }, \"value\": 10}";
-        final String logRecord3 = "{\"name\":\"foo\", \"labels\": { \"label1\": \"v1\", \"lable2\": \"v2\" }, \"value\": 18}";
+        final String logRecord1 = "{\"name\":\"foo\", \"labels\": { \"label1\": \"v1\", \"label2\": \"v2\" }, \"value\": 9}";
+        final String logRecord2 = "{\"name\":\"foo\", \"labels\": { \"label1\": \"aa1\", \"label2\": \"bb2\" }, \"value\": 10}";
+        final String logRecord3 = "{\"name\":\"foo\", \"labels\": { \"label1\": \"v1\", \"label2\": \"v2\" }, \"value\": 18}";
 
         final String topic = "test.hoge";
         KafkaExporterLogEntry jsonRecord = mapper.readValue(logRecord3, KafkaExporterLogEntry.class);
@@ -75,7 +94,7 @@ public class KafkaCollectorTest extends TestCase
 
     public void testMetricExpire() throws IOException {
         PropertyConfig config = new PropertyConfig();
-        config.set("exporter.metric.expire", "120");
+        config.set("exporter.metric.expire.seconds", "120");
 
         KafkaCollector collector = new KafkaCollector(config);
         LocalDateTime setDate1 = LocalDateTime.of(2016, 9, 20, 10, 0);
