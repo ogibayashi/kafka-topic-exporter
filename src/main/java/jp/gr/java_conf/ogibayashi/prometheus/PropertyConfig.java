@@ -56,6 +56,11 @@ public class PropertyConfig {
         String consulKafkaServicename = originalProps.getProperty(Constants.CONSUL_KAFKA_SERVICENAME.key);
 
         if (consulServer != null && consulKafkaServicename != null) {
+            LOG.info("Required properties for Consul discovery have been detected:"
+                    + " [ " 
+                    + Constants.CONSUL_SERVER.key + " : \"" + consulServer + "\", "
+                    + Constants.CONSUL_KAFKA_SERVICENAME.key + " : \"" + consulKafkaServicename + "\""
+                    + "]");
             String bootstrapServers = getBootStrapServersFromConsul(consulServer, consulKafkaServicename).toString();
             if (bootstrapServers != null && !bootstrapServers.equals("")) {
                 //originalProps.setProperty(Constants.BOOTSTRAP_SERVERS.key, bootstrapServers);
