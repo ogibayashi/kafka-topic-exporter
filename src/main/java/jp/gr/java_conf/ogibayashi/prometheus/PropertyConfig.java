@@ -4,16 +4,25 @@ import java.io.FileNotFoundException;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.orbitz.consul.Consul;
+import com.orbitz.consul.HealthClient;
+import com.orbitz.consul.model.health.ServiceHealth;
+
 public class PropertyConfig {
     private static final Logger LOG = LoggerFactory.getLogger(ConsumerThread.class);
 
     public enum Constants {
+        CONSUL_SERVER("consul.server"),
+        CONSUL_KAFKA_SERVICENAME("consul.kafka.servicename"),
+        BOOTSTRAP_SERVERS("bootstrap.servers"),
         EXPORTER_PORT("exporter.port"),
         EXPORTER_METRIC_EXPIRE("exporter.metric.expire.seconds"),
         KAFKA_CONSUMER_TOPICS("kafka.consumer.topics"),
@@ -37,6 +46,41 @@ public class PropertyConfig {
         props.put("enable.auto.commit", "false");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        LOG.info("Before fixing bootstrap servers[" + props.toString() + "]");
+        fixBootstrapServerIfConsulExists(props);
+        LOG.info("After fixing bootstrap servers[" + props.toString() + "]");
+    }
+
+    void fixBootstrapServerIfConsulExists(Properties originalProps) {
+        String consulServer = originalProps.getProperty(Constants.CONSUL_SERVER.key);
+        String consulKafkaServicename = originalProps.getProperty(Constants.CONSUL_KAFKA_SERVICENAME.key);
+
+        if (consulServer != null && consulKafkaServicename != null) {
+            String bootstrapServers = getBootStrapServersFromConsul(consulServer, consulKafkaServicename).toString();
+            if (bootstrapServers != null && !bootstrapServers.equals("")) {
+                //originalProps.setProperty(Constants.BOOTSTRAP_SERVERS.key, bootstrapServers);
+                LOG.info("\"bootstrap.servers\" property should be: [" + bootstrapServers + "]");
+            }
+        }
+    }
+
+    ArrayList<String> getBootStrapServersFromConsul(String consulServer, String consulKafkaServicename) {
+        ArrayList<String> bootstrapServers = null;
+        Consul consul = Consul.builder().withUrl(consulServer).build();
+        HealthClient healthClient = consul.healthClient();
+
+        // discover only "passing" nodes
+        List<ServiceHealth> nodes = healthClient.getHealthyServiceInstances(consulKafkaServicename).getResponse();
+        for (ServiceHealth kafkaNode : nodes) {
+            String address = kafkaNode.getService().getAddress();
+            String port = kafkaNode.getService().getPort() + "";
+            if (bootstrapServers == null) {
+                bootstrapServers = new ArrayList<String>();
+            }
+            bootstrapServers.add(address + ":" + port);
+        }
+        LOG.info("Kafka server found through Consul: " + bootstrapServers.toString());
+        return bootstrapServers;
     }
 
     public Pattern getTopicsPattern() {
