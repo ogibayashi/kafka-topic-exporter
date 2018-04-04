@@ -7,7 +7,12 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class PropertyConfig {
+    private static final Logger LOG = LoggerFactory.getLogger(ConsumerThread.class);
+
     public enum Constants {
         EXPORTER_PORT("exporter.port"),
         EXPORTER_METRIC_EXPIRE("exporter.metric.expire.seconds"),
