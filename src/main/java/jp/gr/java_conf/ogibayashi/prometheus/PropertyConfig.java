@@ -64,33 +64,38 @@ public class PropertyConfig {
         String consulKafkaServicename = originalProps.getProperty(Constants.CONSUL_KAFKA_SERVICENAME.key);
 
         if (consulServer != null && consulKafkaServicename != null) {
-            LOG.info("Required properties for Consul discovery have been detected:"
-                    + " [ " 
-                    + Constants.CONSUL_SERVER.key + " : \"" + consulServer + "\", "
-                    + Constants.CONSUL_KAFKA_SERVICENAME.key + " : \"" + consulKafkaServicename + "\""
-                    + "]");
-            String bootstrapServers = getBootStrapServersFromConsul(consulServer, consulKafkaServicename).toString();
-            if (bootstrapServers != null && !bootstrapServers.equals("")) {
-                //originalProps.setProperty(Constants.BOOTSTRAP_SERVERS.key, bootstrapServers);
-                LOG.info("\"bootstrap.servers\" property should be: [" + bootstrapServers + "]");
+            LOG.info("CONSUL: Required properties for using Consul service discovery have been detected");
+            ArrayList<String> bootstrapServersArray = getBootStrapServersFromConsul(consulServer, consulKafkaServicename);
+            if (bootstrapServersArray != null) {
+                String bootstrapServers = String.join(",", bootstrapServersArray);
+                if (bootstrapServers != null && !bootstrapServers.equals("")) {
+                    originalProps.setProperty(Constants.BOOTSTRAP_SERVERS.key, bootstrapServers);
+                    LOG.info("CONSUL: \"bootstrap.servers\" property value has been set to: [" + bootstrapServers + "]");
+                }
             }
         }
     }
 
     ArrayList<String> getBootStrapServersFromConsul(String consulServer, String consulKafkaServicename) {
         ArrayList<String> bootstrapServers = null;
-        Consul consul = Consul.builder().withUrl(consulServer).build();
-        HealthClient healthClient = consul.healthClient();
+        LOG.info("CONSUL: Consul server used: [" + consulServer + "]");
+        LOG.info("CONSUL: Consul service retrieved: [" + consulKafkaServicename + "]");
+        try {
+            Consul consul = Consul.builder().withUrl(consulServer).build();
+            HealthClient healthClient = consul.healthClient();
 
-        // discover only "passing" nodes
-        List<ServiceHealth> nodes = healthClient.getHealthyServiceInstances(consulKafkaServicename).getResponse();
-        for (ServiceHealth kafkaNode : nodes) {
-            String address = kafkaNode.getService().getAddress();
-            String port = kafkaNode.getService().getPort() + "";
-            if (bootstrapServers == null) {
-                bootstrapServers = new ArrayList<String>();
+            // discover only "passing" nodes
+            List<ServiceHealth> nodes = healthClient.getHealthyServiceInstances(consulKafkaServicename).getResponse();
+            for (ServiceHealth kafkaNode : nodes) {
+                String address = kafkaNode.getService().getAddress();
+                String port = kafkaNode.getService().getPort() + "";
+                if (bootstrapServers == null) {
+                    bootstrapServers = new ArrayList<String>();
+                }
+                bootstrapServers.add(address + ":" + port);
             }
-            bootstrapServers.add(address + ":" + port);
+        } catch (Exception e){
+            LOG.error("CONSUL: " + e.toString());
         }
         LOG.info("CONSUL: Kafka services found through Consul server: [" + (bootstrapServers==null?"None available":bootstrapServers.toString()) + "]");
         return bootstrapServers;
