@@ -17,7 +17,7 @@ import com.orbitz.consul.HealthClient;
 import com.orbitz.consul.model.health.ServiceHealth;
 
 public class PropertyConfig {
-    private static final Logger LOG = LoggerFactory.getLogger(ConsumerThread.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PropertyConfig.class);
 
     public enum Constants {
         CONSUL_SERVER("consul.server"),
