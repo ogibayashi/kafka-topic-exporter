@@ -3,6 +3,8 @@ package jp.gr.java_conf.ogibayashi.prometheus;
 import java.io.FileNotFoundException;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,12 @@ import com.orbitz.consul.model.health.ServiceHealth;
 
 public class PropertyConfig {
     private static final Logger LOG = LoggerFactory.getLogger(PropertyConfig.class);
+
+    public static String getPropertyAsString(Properties prop) {
+        StringWriter writer = new StringWriter();
+        prop.list(new PrintWriter(writer));
+        return writer.getBuffer().toString();
+    }
 
     public enum Constants {
         CONSUL_SERVER("consul.server"),
@@ -46,9 +54,9 @@ public class PropertyConfig {
         props.put("enable.auto.commit", "false");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        LOG.info("Before fixing bootstrap servers[" + props.toString() + "]");
+        LOG.info("CONSUL: Before fixing bootstrap servers[\n" + getPropertyAsString(props) + "]");
         fixBootstrapServerIfConsulExists(props);
-        LOG.info("After fixing bootstrap servers[" + props.toString() + "]");
+        LOG.info("CONSUL: After fixing bootstrap servers[\n" + getPropertyAsString(props) + "]");
     }
 
     void fixBootstrapServerIfConsulExists(Properties originalProps) {
@@ -84,7 +92,7 @@ public class PropertyConfig {
             }
             bootstrapServers.add(address + ":" + port);
         }
-        LOG.info("Kafka server found through Consul: " + bootstrapServers.toString());
+        LOG.info("CONSUL: Kafka services found through Consul server: [" + (bootstrapServers==null?"None available":bootstrapServers.toString()) + "]");
         return bootstrapServers;
     }
 
