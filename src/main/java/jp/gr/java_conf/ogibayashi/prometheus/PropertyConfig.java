@@ -97,7 +97,7 @@ public class PropertyConfig {
         } catch (Exception e){
             LOG.error("CONSUL: " + e.toString());
         }
-        LOG.info("CONSUL: Kafka services found through Consul server: [" + (bootstrapServers==null?"None available":bootstrapServers.toString()) + "]");
+        LOG.info("CONSUL: Kafka services found through Consul server: " + (bootstrapServers==null?"None available":bootstrapServers.toString()));
         return bootstrapServers;
     }
 
