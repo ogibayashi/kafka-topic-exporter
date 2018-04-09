@@ -28,7 +28,7 @@ public class PropertyConfig {
     }
 
     public enum Constants {
-        CONSUL_SERVER("consul.server"),
+        CONSUL_SERVER_URL("consul.server.url"),
         CONSUL_KAFKA_SERVICENAME("consul.kafka.servicename"),
         BOOTSTRAP_SERVERS("bootstrap.servers"),
         EXPORTER_PORT("exporter.port"),
@@ -60,7 +60,7 @@ public class PropertyConfig {
     }
 
     void fixBootstrapServerIfConsulExists(Properties originalProps) {
-        String consulServer = originalProps.getProperty(Constants.CONSUL_SERVER.key);
+        String consulServer = originalProps.getProperty(Constants.CONSUL_SERVER_URL.key);
         String consulKafkaServicename = originalProps.getProperty(Constants.CONSUL_KAFKA_SERVICENAME.key);
 
         if (consulServer != null && consulKafkaServicename != null) {
