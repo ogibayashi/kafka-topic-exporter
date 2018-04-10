@@ -28,7 +28,7 @@ kafka.consumer.topics=export\..*
 kafka.consumer.remove.prefix=export\.
 
 # Consul server address
-consul.server=127.0.0.1:8500
+consul.server=http://localhost:8500
 
 # Name for Kafka services inside Consul
 consul.kafka.servicename=kafka
