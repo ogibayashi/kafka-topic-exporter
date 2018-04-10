@@ -3,8 +3,6 @@ package jp.gr.java_conf.ogibayashi.prometheus;
 import java.io.FileNotFoundException;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
