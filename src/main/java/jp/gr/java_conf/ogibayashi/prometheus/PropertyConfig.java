@@ -50,12 +50,12 @@ public class PropertyConfig {
     }
 
     void changeBootstrapServersIfConsulServerAvailable(Properties originalProps) {
-        String consulServer = originalProps.getProperty(Constants.CONSUL_SERVER_URL.key);
+        String consulServerUrl = originalProps.getProperty(Constants.CONSUL_SERVER_URL.key);
         String consulKafkaServicename = originalProps.getProperty(Constants.CONSUL_KAFKA_SERVICENAME.key);
 
-        if (consulServer != null && consulKafkaServicename != null) {
+        if (consulServerUrl != null && !consulServerUrl.equals("") && consulKafkaServicename != null && !consulKafkaServicename.equals("")) {
             LOG.info("CONSUL: Required properties for using Consul service discovery have been detected");
-            ArrayList<String> bootstrapServersArray = getBootStrapServersFromConsul(consulServer, consulKafkaServicename);
+            ArrayList<String> bootstrapServersArray = getBootStrapServersFromConsul(consulServerUrl, consulKafkaServicename);
             if (bootstrapServersArray != null) {
                 String bootstrapServers = String.join(",", bootstrapServersArray);
                 if (bootstrapServers != null && !bootstrapServers.equals("")) {
@@ -65,6 +65,8 @@ public class PropertyConfig {
                     LOG.info("CONSUL: \"bootstrap.servers\" property value has been set to: [" + bootstrapServers + "]");
                 }
             }
+        } else {
+            LOG.info("CONSUL: Not found required properties for using Consul service discovery");
         }
     }
 
