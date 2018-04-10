@@ -21,12 +21,6 @@ import com.orbitz.consul.model.health.ServiceHealth;
 public class PropertyConfig {
     private static final Logger LOG = LoggerFactory.getLogger(PropertyConfig.class);
 
-    public static String getPropertyAsString(Properties prop) {
-        StringWriter writer = new StringWriter();
-        prop.list(new PrintWriter(writer));
-        return writer.getBuffer().toString();
-    }
-
     public enum Constants {
         CONSUL_SERVER_URL("consul.server.url"),
         CONSUL_KAFKA_SERVICENAME("consul.kafka.servicename"),
@@ -54,9 +48,7 @@ public class PropertyConfig {
         props.put("enable.auto.commit", "false");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        LOG.info("CONSUL: Before fixing bootstrap servers[\n" + getPropertyAsString(props) + "]");
         fixBootstrapServerIfConsulExists(props);
-        LOG.info("CONSUL: After fixing bootstrap servers[\n" + getPropertyAsString(props) + "]");
     }
 
     void fixBootstrapServerIfConsulExists(Properties originalProps) {
@@ -69,6 +61,7 @@ public class PropertyConfig {
             if (bootstrapServersArray != null) {
                 String bootstrapServers = String.join(",", bootstrapServersArray);
                 if (bootstrapServers != null && !bootstrapServers.equals("")) {
+                    LOG.info("CONSUL: \"bootstrap.servers\" property value was: [" + bootstrapServers + "]");
                     originalProps.setProperty(Constants.BOOTSTRAP_SERVERS.key, bootstrapServers);
                     LOG.info("CONSUL: \"bootstrap.servers\" property value has been set to: [" + bootstrapServers + "]");
                 }
