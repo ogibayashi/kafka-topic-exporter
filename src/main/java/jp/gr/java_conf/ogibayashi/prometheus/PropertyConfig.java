@@ -59,7 +59,8 @@ public class PropertyConfig {
             if (bootstrapServersArray != null) {
                 String bootstrapServers = String.join(",", bootstrapServersArray);
                 if (bootstrapServers != null && !bootstrapServers.equals("")) {
-                    LOG.info("CONSUL: \"bootstrap.servers\" property value was: [" + bootstrapServers + "]");
+                    String originalBootstrapServers = originalProps.getProperty(Constants.BOOTSTRAP_SERVERS.key);
+                    LOG.info("CONSUL: \"bootstrap.servers\" property value was: [" + originalBootstrapServers + "]");
                     originalProps.setProperty(Constants.BOOTSTRAP_SERVERS.key, bootstrapServers);
                     LOG.info("CONSUL: \"bootstrap.servers\" property value has been set to: [" + bootstrapServers + "]");
                 }
