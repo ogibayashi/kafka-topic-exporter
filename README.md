@@ -5,7 +5,7 @@ Consume Kafka topics and export to Prometheus
 ### Start process
 
 ```
-java -jar kafka-topic-exporter-0.0.5-jar-with-dependencies.jar config/kafka-topic-exporter.properties
+java -jar kafka-topic-exporter-0.0.6-jar-with-dependencies.jar config/kafka-topic-exporter.properties
 ```
 
 ### Configuration
@@ -26,6 +26,12 @@ kafka.consumer.topics=export\..*
 
 # RegEx for removing substring from Kafka info
 kafka.consumer.remove.prefix=export\.
+
+# Consul server address
+consul.server.url=http://localhost:8500
+
+# Name for Kafka services inside Consul
+consul.kafka.servicename=kafka
 
 ## Kafka core properties
 

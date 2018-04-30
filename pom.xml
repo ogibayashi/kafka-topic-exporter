@@ -4,7 +4,7 @@
   <groupId>jp.gr.java_conf.ogibayashi</groupId>
   <artifactId>kafka-topic-exporter</artifactId>
   <packaging>jar</packaging>
-  <version>0.0.5</version>
+  <version>0.0.6</version>
   <name>kafka-topic-exporter</name>
   <url>http://maven.apache.org</url>
 
@@ -75,6 +75,11 @@
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.orbitz.consul</groupId>
+      <artifactId>consul-client</artifactId>
+      <version>1.1.1</version>
     </dependency>
   </dependencies>
 
